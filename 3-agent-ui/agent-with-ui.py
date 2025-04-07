@@ -3,7 +3,7 @@ from asana.rest import ApiException
 from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime
-import streamlit as st
+import streamlit as st # the new thing this lesson
 import json
 import os
 
@@ -102,13 +102,15 @@ def prompt_ai(messages, nested_calls=0):
 def main():
     st.title("Asana Chatbot")
 
-    # Initialize chat history
+    # Initialize chat history; everything in session state, starts default context
+    # reruns all of python script, need to make sure entire chat history isnt deleted
     if "messages" not in st.session_state:
         st.session_state.messages = [
             SystemMessage(content=f"You are a personal assistant who helps manage tasks in Asana. The current date is: {datetime.now().date()}")
         ]    
 
     # Display chat messages from history on app rerun
+    # can get rid of system? 
     for message in st.session_state.messages:
         message_json = json.loads(message.json())
         message_type = message_json["type"]
@@ -118,6 +120,7 @@ def main():
 
     # React to user input
     if prompt := st.chat_input("What would you like to do today?"):
+        #updating both ui and session state SUPER IMPORTANT
         # Display user message in chat message container
         st.chat_message("user").markdown(prompt)
         # Add user message to chat history

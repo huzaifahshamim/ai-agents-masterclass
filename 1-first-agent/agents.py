@@ -18,6 +18,8 @@ api_client = asana.ApiClient(configuration)
 tasks_api_instance = asana.TasksApi(api_client)
 
 def create_asana_task(task_name, due_on="today"):
+     # look at asani api to look at the different tasks we can do
+
     """
     Creates a task in Asana given the name of the task and when it is due
 
@@ -47,7 +49,22 @@ def create_asana_task(task_name, due_on="today"):
     except ApiException as e:
         return f"Exception when calling TasksApi->create_task: {e}"
 
+def delete_asana_task(task_gid):
+    """
+    Deletes a task in Asana given the task GID
+    """
+    try:
+        # Ensure task_gid is a string
+        if not isinstance(task_gid, str):
+            raise ValueError(f"Expected string for task_gid but got: {type(task_gid)} -> {task_gid}")
+        
+        api_response = tasks_api_instance.delete_task(task_gid)
+        return json.dumps(api_response, indent=2)
+    except (ApiException, ValueError) as e:
+        return f"Exception when calling TasksApi->delete_task: {e}"
+
 def get_tools():
+    # each object is a defgined function that our chatGPT can call
     tools = [
         {
             "type": "function",
@@ -69,6 +86,23 @@ def get_tools():
                     "required": ["task_name"]
                 },
             },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "delete_asana_task",
+                "description": "Deletes a task in Asana given the ID of the task",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "task_gid": {
+                            "type": "string",
+                            "description": "The id of the task in Asana"
+                        },
+                    },
+                    "required": ["task_gid"]
+                },
+            },
         }
     ]
 
@@ -76,6 +110,8 @@ def get_tools():
 
 def prompt_ai(messages):
     # First, prompt the AI with the latest user message
+    # messages includes entire chat history for context
+    # tools is what makes it the ai AGENT
     completion = client.chat.completions.create(
         model=model,
         messages=messages,
@@ -89,7 +125,8 @@ def prompt_ai(messages):
     if tool_calls:
         # If the AI decided to invoke a tool, invoke it
         available_functions = {
-            "create_asana_task": create_asana_task
+            "create_asana_task": create_asana_task,
+            "delete_asana_task": delete_asana_task
         }
 
         # Add the tool request to the list of messages so the AI knows later it invoked the tool
@@ -100,6 +137,7 @@ def prompt_ai(messages):
             function_name = tool_call.function.name
             function_to_call = available_functions[function_name]
             function_args = json.loads(tool_call.function.arguments)
+            print("DEBUG: tool function args:", function_args)
             function_response = function_to_call(**function_args)
 
             messages.append({

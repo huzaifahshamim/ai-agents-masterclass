@@ -21,6 +21,7 @@ api_client = asana.ApiClient(configuration)
 
 tasks_api_instance = asana.TasksApi(api_client)
 
+# Now defining that this is a tool, and good doc strings (completely gets rid of get_tools function)
 @tool
 def create_asana_task(task_name, due_on="today"):
     """
@@ -57,9 +58,9 @@ def prompt_ai(messages, nested_calls=0):
         raise "AI is tool calling too much!"
 
     # First, prompt the AI with the latest user message
-    tools = [create_asana_task]
+    tools = [create_asana_task] #here is where we include all the tools that we have 
     asana_chatbot = ChatOpenAI(model=model) if "gpt" in model.lower() else ChatAnthropic(model=model)
-    asana_chatbot_with_tools = asana_chatbot.bind_tools(tools)
+    asana_chatbot_with_tools = asana_chatbot.bind_tools(tools) #LLM model augmented with the tools that we want
 
     ai_response = asana_chatbot_with_tools.invoke(messages)
     print(ai_response)
@@ -94,17 +95,31 @@ def main():
         SystemMessage(content=f"You are a personal assistant who helps manage tasks in Asana. The current date is: {datetime.now().date()}")
     ]
 
+    # Used to be 
+    # messages = [
+    #     {
+    #         "role": "system",
+    #         "content": f"You are a personal assistant who helps manage tasks in Asana. The current date is: {datetime.now().date()}"
+    #     }
+    # ]
+
     while True:
         user_input = input("Chat with AI (q to quit): ").strip()
         
         if user_input == 'q':
             break  
-
+        
+        # Used to be
+        # messages.append({"role": "user", "content": user_input})
         messages.append(HumanMessage(content=user_input))
         ai_response = prompt_ai(messages)
 
         print(ai_response.content)
         messages.append(ai_response)
+
+        # Used to be
+        # print(ai_response)
+        # messages.append({"role": "assistant", "content": ai_response})
 
 
 if __name__ == "__main__":

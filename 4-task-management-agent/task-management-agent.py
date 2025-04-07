@@ -31,6 +31,7 @@ workspace_gid = os.getenv("ASANA_WORKPLACE_ID", "")
 # ~~~~~~~~~~~~~~~~~~~~~ AI Agent Tool Functions ~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# THIS IS JUST A BUFFED UP VERSION OF LESSON 1 WITH STREAMLIT
 
 @tool
 def create_asana_task(task_name, project_gid, due_on="today"):
